@@ -8,6 +8,9 @@
 // Standard Headers
 #include <cstdio>
 #include <cstdlib>
+#include <unistd.h>
+
+#include "shader_s.cpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -25,7 +28,7 @@ const char *fragmentShaderSource = "#version 330 core\n"
                                    "out vec4 FragColor;\n"
                                    "void main()\n"
                                    "{\n"
-                                   "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+                                   "   FragColor = vec4(1.0, 1.0, 0, 1.0);\n"
                                    "}\n\0";
 
 int main(int argc, char *argv[])
@@ -88,6 +91,19 @@ int main(int argc, char *argv[])
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+char buffer[256]; 
+char *val = getcwd(buffer, sizeof(buffer)); 
+if (val) { 
+    printf("Path:");
+    std::cout << buffer << std::endl; 
+} 
+    // Shader ourShader("Shaders/shader.vs", "Shaders/shader.fs");
+    char *n_str = new char[strlen(val)+1];
+    strcpy(n_str,val);
+    strcat(val, "/Glitter/Shaders/shader.vs");
+    strcat(n_str, "/Glitter/Shaders/shader.fs");
+    Shader ourShader(val, n_str);
+    // Shader ourShader("shader.vs", "shader.fs");
     //
     float vertices[] = {
         0.5f, 0.5f, 0.0f,   // top right
@@ -118,7 +134,7 @@ int main(int argc, char *argv[])
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     // Rendering Loop
     while (!glfwWindowShouldClose(mWindow))
     {
@@ -128,7 +144,18 @@ int main(int argc, char *argv[])
         glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
+        // glUseProgram(shaderProgram);
+        ourShader.use();
+    // ourShader.setFloat("someUniform", 1.0f);
+
+        float timeValue = glfwGetTime();
+        float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+        // int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+        // glUseProgram(shaderProgram);
+        // glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        ourShader.use();
+        // ourShader.setFloat("tColor", 1.0f);
+
         glBindVertexArray(VAO);
         // glDrawArrays(GL_TRIANGLES, 0, 3);
         // glDrawArrays(GL_TRIANGLES, 1, 3);
